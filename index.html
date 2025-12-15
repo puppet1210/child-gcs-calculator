@@ -19,6 +19,8 @@
             padding: 15px;
             font-size: 16px;
             min-height: 100vh;
+            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-color: transparent;
         }
         
         .container {
@@ -44,6 +46,7 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            flex-wrap: wrap;
         }
         
         .icon {
@@ -72,17 +75,6 @@
         
         .content-wrapper {
             padding: 20px;
-        }
-        
-        .section-title {
-            font-size: 1.4rem;
-            color: #1565c0;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #bbdefb;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
         
         .input-section {
@@ -137,6 +129,9 @@
             font-size: 1rem;
             background-color: white;
             transition: all 0.2s;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
         
         select:focus, .age-input:focus {
@@ -178,18 +173,25 @@
             gap: 10px;
         }
         
-        .result-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+        .scores-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: nowrap;
             margin-bottom: 20px;
+            gap: 10px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 10px;
         }
         
-        .result-item {
+        .score-item {
             background-color: white;
             padding: 15px;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            min-width: 110px;
+            flex: 1;
+            text-align: center;
         }
         
         .result-label {
@@ -199,18 +201,33 @@
         }
         
         .result-value {
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: #0d47a1;
         }
         
-        .result-value.important {
+        .total-score-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .total-label {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .total-value {
+            font-size: 2.2rem;
+            font-weight: 700;
             color: #e53935;
-            font-size: 1.6rem;
         }
         
         .severity-indicator {
-            margin-top: 20px;
             padding: 15px;
             background-color: white;
             border-radius: 8px;
@@ -265,6 +282,7 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            -webkit-tap-highlight-color: rgba(0,0,0,0.1);
         }
         
         .reset-btn {
@@ -272,7 +290,7 @@
             color: #333;
         }
         
-        .reset-btn:hover {
+        .reset-btn:hover, .reset-btn:active {
             background-color: #e0e0e0;
         }
         
@@ -281,7 +299,7 @@
             color: white;
         }
         
-        .info-btn:hover {
+        .info-btn:hover, .info-btn:active {
             background-color: #f57c00;
         }
         
@@ -322,7 +340,7 @@
         }
         
         /* 适应小屏幕 */
-        @media (max-width: 480px) {
+        @media (max-width: 768px) {
             body {
                 padding: 10px;
                 font-size: 15px;
@@ -340,8 +358,14 @@
                 padding: 15px;
             }
             
-            .result-grid {
-                grid-template-columns: 1fr;
+            .scores-container {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+            }
+            
+            .score-item {
+                min-width: 100px;
+                flex-shrink: 0;
             }
             
             .input-row {
@@ -355,6 +379,26 @@
             
             .buttons {
                 flex-direction: column;
+            }
+            
+            .total-value {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .scores-container {
+                flex-wrap: wrap;
+                overflow-x: visible;
+            }
+            
+            .score-item {
+                min-width: calc(33.333% - 7px);
+                flex-shrink: 1;
+            }
+            
+            .total-value {
+                font-size: 1.8rem;
             }
         }
         
@@ -380,6 +424,7 @@
             padding: 25px;
             max-height: 80vh;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         
         .modal-header {
@@ -406,9 +451,10 @@
             align-items: center;
             justify-content: center;
             border-radius: 50%;
+            -webkit-tap-highlight-color: transparent;
         }
         
-        .close-btn:hover {
+        .close-btn:hover, .close-btn:active {
             background-color: #f5f5f5;
         }
         
@@ -438,15 +484,12 @@
 </head>
 <body>
     <div class="container">
-        <script type="module" src="/index.tsx"></script> 
         <header>
             <h1><span class="icon">👶</span> 儿童GCS评分计算器 <span class="version-badge">儿童专用</span></h1>
             <p>根据儿童年龄调整的格拉斯哥昏迷评分法</p>
         </header>
         
         <div class="content-wrapper">
-            <h2 class="section-title"><span class="icon">📋</span> 患者信息</h2>
-            
             <div class="input-section">
                 <div class="input-group">
                     <div class="input-label">
@@ -510,23 +553,24 @@
             <div class="result-section">
                 <h3 class="result-title"><span class="icon">📊</span> 儿童GCS评分结果</h3>
                 
-                <div class="result-grid">
-                    <div class="result-item">
+                <div class="scores-container">
+                    <div class="score-item">
                         <div class="result-label">睁眼反应 (E)</div>
                         <div class="result-value" id="eyeScore">--</div>
                     </div>
-                    <div class="result-item">
+                    <div class="score-item">
                         <div class="result-label">最佳运动反应 (M)</div>
                         <div class="result-value" id="motorScore">--</div>
                     </div>
-                    <div class="result-item">
+                    <div class="score-item">
                         <div class="result-label">最佳语言反应 (V)</div>
                         <div class="result-value" id="verbalScore">--</div>
                     </div>
-                    <div class="result-item">
-                        <div class="result-label">GCS总分</div>
-                        <div class="result-value important" id="totalScore">--</div>
-                    </div>
+                </div>
+                
+                <div class="total-score-container">
+                    <div class="total-label">GCS总分</div>
+                    <div class="total-value" id="totalScore">--</div>
                 </div>
                 
                 <div class="severity-indicator">
@@ -787,16 +831,21 @@
                 // 根据年龄组添加选项
                 if (eyeGroup === '<1岁') {
                     // <1岁选项
-                    eyeResponseEl.add(new Option('自发睁眼        4分', '4'));
-                    eyeResponseEl.add(new Option('声音刺激时睁眼        3分', '3'));
-                    eyeResponseEl.add(new Option('疼痛刺激时睁眼        2分', '2'));
-                    eyeResponseEl.add(new Option('刺激后无反应        1分', '1'));
+                    eyeResponseEl.add(new Option('自发睁眼 (4分)', '4'));
+                    eyeResponseEl.add(new Option('声音刺激时睁眼 (3分)', '3'));
+                    eyeResponseEl.add(new Option('疼痛刺激时睁眼 (2分)', '2'));
+                    eyeResponseEl.add(new Option('刺激后无反应 (1分)', '1'));
                 } else {
                     // >1岁选项
-                    eyeResponseEl.add(new Option('自发睁眼        4分', '4'));
-                    eyeResponseEl.add(new Option('语言刺激时睁眼        3分', '3'));
-                    eyeResponseEl.add(new Option('疼痛刺激时睁眼        2分', '2'));
-                    eyeResponseEl.add(new Option('刺激后无反应        1分', '1'));
+                    eyeResponseEl.add(new Option('自发睁眼 (4分)', '4'));
+                    eyeResponseEl.add(new Option('语言刺激时睁眼 (3分)', '3'));
+                    eyeResponseEl.add(new Option('疼痛刺激时睁眼 (2分)', '2'));
+                    eyeResponseEl.add(new Option('刺激后无反应 (1分)', '1'));
+                }
+                
+                // 确保默认选项为"请选择"
+                if (!eyeResponseEl.value) {
+                    eyeResponseEl.value = "";
                 }
             }
             
@@ -810,20 +859,25 @@
                 // 根据年龄组添加选项
                 if (motorGroup === '<1岁') {
                     // <1岁选项
-                    motorResponseEl.add(new Option('自发运动        6分', '6'));
-                    motorResponseEl.add(new Option('因局部疼痛而动        5分', '5'));
-                    motorResponseEl.add(new Option('因疼痛而屈曲回缩        4分', '4'));
-                    motorResponseEl.add(new Option('因疼痛而成屈曲反应        3分', '3'));
-                    motorResponseEl.add(new Option('因疼痛呈伸展反应        2分', '2'));
-                    motorResponseEl.add(new Option('无运动反应        1分', '1'));
+                    motorResponseEl.add(new Option('自发运动 (6分)', '6'));
+                    motorResponseEl.add(new Option('因局部疼痛而动 (5分)', '5'));
+                    motorResponseEl.add(new Option('因疼痛而屈曲回缩 (4分)', '4'));
+                    motorResponseEl.add(new Option('因疼痛而成屈曲反应 (3分)', '3'));
+                    motorResponseEl.add(new Option('因疼痛呈伸展反应 (2分)', '2'));
+                    motorResponseEl.add(new Option('无运动反应 (1分)', '1'));
                 } else {
                     // >1岁选项
-                    motorResponseEl.add(new Option('服从命令而动        6分', '6'));
-                    motorResponseEl.add(new Option('因局部疼痛而动        5分', '5'));
-                    motorResponseEl.add(new Option('因疼痛而屈曲回缩        4分', '4'));
-                    motorResponseEl.add(new Option('因疼痛而成屈曲反应        3分', '3'));
-                    motorResponseEl.add(new Option('因疼痛呈伸展反应        2分', '2'));
-                    motorResponseEl.add(new Option('无运动反应        1分', '1'));
+                    motorResponseEl.add(new Option('服从命令而动 (6分)', '6'));
+                    motorResponseEl.add(new Option('因局部疼痛而动 (5分)', '5'));
+                    motorResponseEl.add(new Option('因疼痛而屈曲回缩 (4分)', '4'));
+                    motorResponseEl.add(new Option('因疼痛而成屈曲反应 (3分)', '3'));
+                    motorResponseEl.add(new Option('因疼痛呈伸展反应 (2分)', '2'));
+                    motorResponseEl.add(new Option('无运动反应 (1分)', '1'));
+                }
+                
+                // 确保默认选项为"请选择"
+                if (!motorResponseEl.value) {
+                    motorResponseEl.value = "";
                 }
             }
             
@@ -837,25 +891,30 @@
                 // 根据年龄组添加选项
                 if (verbalGroup === '<2岁') {
                     // <2岁选项
-                    verbalResponseEl.add(new Option('微笑，发声        5分', '5'));
-                    verbalResponseEl.add(new Option('哭闹，可安慰        4分', '4'));
-                    verbalResponseEl.add(new Option('持续哭闹，尖叫        3分', '3'));
-                    verbalResponseEl.add(new Option('呻吟，不安        2分', '2'));
-                    verbalResponseEl.add(new Option('无反应        1分', '1'));
+                    verbalResponseEl.add(new Option('微笑，发声 (5分)', '5'));
+                    verbalResponseEl.add(new Option('哭闹，可安慰 (4分)', '4'));
+                    verbalResponseEl.add(new Option('持续哭闹，尖叫 (3分)', '3'));
+                    verbalResponseEl.add(new Option('呻吟，不安 (2分)', '2'));
+                    verbalResponseEl.add(new Option('无反应 (1分)', '1'));
                 } else if (verbalGroup === '2-5岁') {
                     // 2-5岁选项
-                    verbalResponseEl.add(new Option('适当的单词，短语        5分', '5'));
-                    verbalResponseEl.add(new Option('词语不当        4分', '4'));
-                    verbalResponseEl.add(new Option('持续哭闹，尖叫        3分', '3'));
-                    verbalResponseEl.add(new Option('呻吟        2分', '2'));
-                    verbalResponseEl.add(new Option('无反应        1分', '1'));
+                    verbalResponseEl.add(new Option('适当的单词，短语 (5分)', '5'));
+                    verbalResponseEl.add(new Option('词语不当 (4分)', '4'));
+                    verbalResponseEl.add(new Option('持续哭闹，尖叫 (3分)', '3'));
+                    verbalResponseEl.add(new Option('呻吟 (2分)', '2'));
+                    verbalResponseEl.add(new Option('无反应 (1分)', '1'));
                 } else {
                     // >5岁选项
-                    verbalResponseEl.add(new Option('能定向说话        5分', '5'));
-                    verbalResponseEl.add(new Option('不能定向说话        4分', '4'));
-                    verbalResponseEl.add(new Option('语言不当        3分', '3'));
-                    verbalResponseEl.add(new Option('语言难以理解        2分', '2'));
-                    verbalResponseEl.add(new Option('无反应        1分', '1'));
+                    verbalResponseEl.add(new Option('能定向说话 (5分)', '5'));
+                    verbalResponseEl.add(new Option('不能定向说话 (4分)', '4'));
+                    verbalResponseEl.add(new Option('语言不当 (3分)', '3'));
+                    verbalResponseEl.add(new Option('语言难以理解 (2分)', '2'));
+                    verbalResponseEl.add(new Option('无反应 (1分)', '1'));
+                }
+                
+                // 确保默认选项为"请选择"
+                if (!verbalResponseEl.value) {
+                    verbalResponseEl.value = "";
                 }
             }
             
@@ -936,35 +995,44 @@
                 
                 // 更新所有选项
                 updateAllOptions();
+                
+                // 更新显示
+                updateDisplay();
             });
             
             infoBtn.addEventListener('click', function() {
                 infoModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden'; // 防止背景滚动
             });
             
             closeModalBtn.addEventListener('click', function() {
                 infoModal.style.display = 'none';
+                document.body.style.overflow = ''; // 恢复滚动
             });
             
             infoModal.addEventListener('click', function(e) {
                 if (e.target === infoModal) {
                     infoModal.style.display = 'none';
+                    document.body.style.overflow = ''; // 恢复滚动
                 }
+            });
+            
+            // 为移动设备优化触摸体验
+            document.querySelectorAll('button, select, input').forEach(el => {
+                el.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.98)';
+                });
+                
+                el.addEventListener('touchend', function() {
+                    this.style.transform = '';
+                });
             });
             
             // 初始加载
             updateAllOptions();
             
-            // 设置示例值（可选）
-            setTimeout(() => {
-                // 如果所有选项都为空，设置一个示例值
-                if (!eyeResponseEl.value && !motorResponseEl.value && !verbalResponseEl.value) {
-                    eyeResponseEl.value = '4';
-                    motorResponseEl.value = '6';
-                    verbalResponseEl.value = '5';
-                    updateDisplay();
-                }
-            }, 500);
+            // 移除示例值设置，确保默认选项为"请选择"
+            // 不再设置任何默认值
         });
     </script>
 </body>
