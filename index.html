@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>儿童格拉斯哥昏迷评分法（GCS）计算器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f0f9ff;
+            color: #333;
+            line-height: 1.5;
+            padding: 15px;
+            font-size: 16px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 120, 200, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e88e5, #0d47a1);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .icon {
+            display: inline-block;
+            font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+            font-size: 1.4em;
+            margin-right: 5px;
+        }
+        
+        header p {
+            font-size: 1rem;
+            opacity: 0.9;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .version-badge {
+            background-color: #ff9800;
+            color: white;
+            font-size: 0.8rem;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .content-wrapper {
+            padding: 20px;
+        }
+        
+        .section-title {
+            font-size: 1.4rem;
+            color: #1565c0;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #bbdefb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .input-section {
+            margin-bottom: 25px;
+            background-color: #f8fdff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        .input-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .input-label {
+            font-size: 1.1rem;
+            color: #1565c0;
+            margin-bottom: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .age-group {
+            flex: 1;
+        }
+        
+        .age-group label {
+            display: block;
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        select, .age-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #bbdefb;
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: white;
+            transition: all 0.2s;
+        }
+        
+        select:focus, .age-input:focus {
+            border-color: #1e88e5;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(30, 136, 229, 0.1);
+        }
+        
+        .age-input {
+            padding: 12px 15px;
+        }
+        
+        .age-unit {
+            min-width: 80px;
+        }
+        
+        .option-description {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+            margin-left: 5px;
+        }
+        
+        .result-section {
+            margin-top: 30px;
+            background-color: #e8f5e9;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid #4caf50;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .result-title {
+            font-size: 1.3rem;
+            color: #2e7d32;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .result-item {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .result-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .result-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #0d47a1;
+        }
+        
+        .result-value.important {
+            color: #e53935;
+            font-size: 1.6rem;
+        }
+        
+        .severity-indicator {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .severity-title {
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .severity-level {
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        
+        .severity-mild {
+            background-color: #c8e6c9;
+            color: #2e7d32;
+        }
+        
+        .severity-moderate {
+            background-color: #fff9c4;
+            color: #f57c00;
+        }
+        
+        .severity-severe {
+            background-color: #ffcdd2;
+            color: #c62828;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .reset-btn {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .reset-btn:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .info-btn {
+            background-color: #ff9800;
+            color: white;
+        }
+        
+        .info-btn:hover {
+            background-color: #f57c00;
+        }
+        
+        .note-box {
+            background-color: #fff8e1;
+            border-radius: 8px;
+            padding: 18px;
+            margin-top: 25px;
+            border-left: 4px solid #ffb300;
+            font-size: 0.95rem;
+        }
+        
+        .note-title {
+            font-size: 1.1rem;
+            color: #ff8f00;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .note-box ul {
+            padding-left: 20px;
+        }
+        
+        .note-box li {
+            margin-bottom: 8px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 0.85rem;
+            border-top: 1px solid #e0f2fe;
+            background-color: #f8fdff;
+            margin-top: 20px;
+        }
+        
+        /* 适应小屏幕 */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+                font-size: 15px;
+            }
+            
+            header {
+                padding: 15px;
+            }
+            
+            header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .content-wrapper {
+                padding: 15px;
+            }
+            
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .age-unit {
+                min-width: auto;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+        }
+        
+        /* 模态框样式 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 12px;
+            padding: 25px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            color: #1565c0;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            color: #666;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .close-btn:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .info-table th {
+            background-color: #1565c0;
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        .info-table td {
+            padding: 10px;
+            border-bottom: 1px solid #e0f2fe;
+        }
+        
+        .info-table tr:nth-child(even) {
+            background-color: #f8fdff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><span class="icon">👶</span> 儿童GCS评分计算器 <span class="version-badge">儿童专用</span></h1>
+            <p>根据儿童年龄调整的格拉斯哥昏迷评分法</p>
+        </header>
+        
+        <div class="content-wrapper">
+            <h2 class="section-title"><span class="icon">📋</span> 患者信息</h2>
+            
+            <div class="input-section">
+                <div class="input-group">
+                    <div class="input-label">
+                        <span class="icon">👶</span> 患者年龄
+                    </div>
+                    <div class="input-row">
+                        <div class="age-group">
+                            <label>年龄数值</label>
+                            <input type="number" id="ageValue" class="age-input" min="0" max="18" step="0.1" value="2">
+                        </div>
+                        <div class="age-group">
+                            <label>年龄单位</label>
+                            <select id="ageUnit" class="age-unit">
+                                <option value="months">月</option>
+                                <option value="years" selected>岁</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span class="icon">👁️</span> 睁眼反应 (E)
+                    </div>
+                    <select id="eyeResponse">
+                        <option value="">请选择睁眼反应</option>
+                        <!-- 选项将根据年龄动态生成 -->
+                    </select>
+                    <div class="option-description">
+                        当前年龄分组：<span id="eyeAgeGroup">>1岁</span>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span class="icon">💪</span> 最佳运动反应 (M)
+                    </div>
+                    <select id="motorResponse">
+                        <option value="">请选择运动反应</option>
+                        <!-- 选项将根据年龄动态生成 -->
+                    </select>
+                    <div class="option-description">
+                        当前年龄分组：<span id="motorAgeGroup">>1岁</span>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span class="icon">🗣️</span> 最佳语言反应 (V)
+                    </div>
+                    <select id="verbalResponse">
+                        <option value="">请选择语言反应</option>
+                        <!-- 选项将根据年龄动态生成 -->
+                    </select>
+                    <div class="option-description">
+                        当前年龄分组：<span id="verbalAgeGroup">2-5岁</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="result-section">
+                <h3 class="result-title"><span class="icon">📊</span> 儿童GCS评分结果</h3>
+                
+                <div class="result-grid">
+                    <div class="result-item">
+                        <div class="result-label">睁眼反应 (E)</div>
+                        <div class="result-value" id="eyeScore">--</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">最佳运动反应 (M)</div>
+                        <div class="result-value" id="motorScore">--</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">最佳语言反应 (V)</div>
+                        <div class="result-value" id="verbalScore">--</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">GCS总分</div>
+                        <div class="result-value important" id="totalScore">--</div>
+                    </div>
+                </div>
+                
+                <div class="severity-indicator">
+                    <div class="severity-title">意识障碍程度分级</div>
+                    <div class="severity-level" id="severityLevel">--</div>
+                </div>
+            </div>
+            
+            <div class="buttons">
+                <button class="reset-btn" id="resetBtn">
+                    <span class="icon">🔄</span> 重置评分
+                </button>
+                <button class="info-btn" id="infoBtn">
+                    <span class="icon">ℹ️</span> 儿童GCS评分说明
+                </button>
+            </div>
+            
+            <div class="note-box">
+                <h3 class="note-title"><span class="icon">⚠️</span> 儿童GCS评分注意事项</h3>
+                <ul>
+                    <li>儿童GCS评分根据年龄调整评分标准，务必准确输入年龄</li>
+                    <li>睁眼反应：<1岁与>1岁标准不同（声音刺激 vs 语言刺激）</li>
+                    <li>运动反应：<1岁与>1岁标准不同（自发运动 vs 服从命令）</li>
+                    <li>语言反应：分为<2岁、2-5岁、>5岁三个年龄段标准</li>
+                    <li>对于气管插管或失语患儿，语言反应记为"T"（总分标注为GCS=9T）</li>
+                    <li>评估结果需结合患儿临床表现及其他检查综合判断</li>
+                </ul>
+            </div>
+        </div>
+        
+        <footer>
+            <p>儿童格拉斯哥昏迷评分法（GCS）计算器 | 根据儿童年龄调整评分标准</p>
+            <p>© 2025 儿科临床工具 | 仅供医疗专业人员参考使用</p>
+        </footer>
+    </div>
+    
+    <!-- 儿童GCS评分说明模态框 -->
+    <div class="modal-overlay" id="infoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title"><span class="icon">📚</span> 儿童GCS评分标准说明</h2>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            
+            <p>儿童格拉斯哥昏迷评分法（GCS）根据儿童发育特点调整了评分标准，不同年龄段使用不同的评估指标。</p>
+            
+            <h3 style="color: #1565c0; margin-top: 20px; margin-bottom: 10px;">睁眼反应（Eye Opening, E）</h3>
+            <table class="info-table">
+                <thead>
+                    <tr>
+                        <th>评分</th>
+                        <th><1岁</th>
+                        <th>>1岁</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>4分</td>
+                        <td>自发睁眼</td>
+                        <td>自发睁眼</td>
+                    </tr>
+                    <tr>
+                        <td>3分</td>
+                        <td>声音刺激时</td>
+                        <td>语言刺激时</td>
+                    </tr>
+                    <tr>
+                        <td>2分</td>
+                        <td>疼痛刺激时</td>
+                        <td>疼痛刺激时</td>
+                    </tr>
+                    <tr>
+                        <td>1分</td>
+                        <td>刺激后无反应</td>
+                        <td>刺激后无反应</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3 style="color: #1565c0; margin-top: 20px; margin-bottom: 10px;">最佳运动反应（Motor Response, M）</h3>
+            <table class="info-table">
+                <thead>
+                    <tr>
+                        <th>评分</th>
+                        <th><1岁</th>
+                        <th>>1岁</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>6分</td>
+                        <td>自发运动</td>
+                        <td>服从命令而动</td>
+                    </tr>
+                    <tr>
+                        <td>5分</td>
+                        <td>因局部疼痛而动</td>
+                        <td>因局部疼痛而动</td>
+                    </tr>
+                    <tr>
+                        <td>4分</td>
+                        <td>因疼痛而屈曲回缩</td>
+                        <td>因疼痛而屈曲回缩</td>
+                    </tr>
+                    <tr>
+                        <td>3分</td>
+                        <td>因疼痛而成屈曲反应</td>
+                        <td>因疼痛而成屈曲反应</td>
+                    </tr>
+                    <tr>
+                        <td>2分</td>
+                        <td>因疼痛呈伸展反应</td>
+                        <td>因疼痛呈伸展反应</td>
+                    </tr>
+                    <tr>
+                        <td>1分</td>
+                        <td>无运动反应</td>
+                        <td>无运动反应</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3 style="color: #1565c0; margin-top: 20px; margin-bottom: 10px;">最佳语言反应（Verbal Response, V）</h3>
+            <table class="info-table">
+                <thead>
+                    <tr>
+                        <th>评分</th>
+                        <th><2岁</th>
+                        <th>2-5岁</th>
+                        <th>>5岁</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>5分</td>
+                        <td>微笑，发声</td>
+                        <td>适当的单词，短语</td>
+                        <td>能定向说话</td>
+                    </tr>
+                    <tr>
+                        <td>4分</td>
+                        <td>哭闹，可安慰</td>
+                        <td>词语不当</td>
+                        <td>不能定向说话</td>
+                    </tr>
+                    <tr>
+                        <td>3分</td>
+                        <td>持续哭闹，尖叫</td>
+                        <td>持续哭闹，尖叫</td>
+                        <td>语言不当</td>
+                    </tr>
+                    <tr>
+                        <td>2分</td>
+                        <td>呻吟，不安</td>
+                        <td>呻吟</td>
+                        <td>语言难以理解</td>
+                    </tr>
+                    <tr>
+                        <td>1分</td>
+                        <td>无反应</td>
+                        <td>无反应</td>
+                        <td>无反应</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div style="margin-top: 20px;">
+                <h3 style="color: #1565c0; margin-bottom: 10px;">严重程度分级</h3>
+                <ul>
+                    <li><strong>轻度意识障碍</strong>：GCS 13-15分</li>
+                    <li><strong>中度意识障碍</strong>：GCS 9-12分</li>
+                    <li><strong>重度意识障碍</strong>：GCS 3-8分（通常定义为昏迷）</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM元素引用
+            const ageValueEl = document.getElementById('ageValue');
+            const ageUnitEl = document.getElementById('ageUnit');
+            const eyeResponseEl = document.getElementById('eyeResponse');
+            const motorResponseEl = document.getElementById('motorResponse');
+            const verbalResponseEl = document.getElementById('verbalResponse');
+            const eyeScoreEl = document.getElementById('eyeScore');
+            const motorScoreEl = document.getElementById('motorScore');
+            const verbalScoreEl = document.getElementById('verbalScore');
+            const totalScoreEl = document.getElementById('totalScore');
+            const severityLevelEl = document.getElementById('severityLevel');
+            const resetBtn = document.getElementById('resetBtn');
+            const infoBtn = document.getElementById('infoBtn');
+            const infoModal = document.getElementById('infoModal');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const eyeAgeGroupEl = document.getElementById('eyeAgeGroup');
+            const motorAgeGroupEl = document.getElementById('motorAgeGroup');
+            const verbalAgeGroupEl = document.getElementById('verbalAgeGroup');
+            
+            // 年龄分组函数
+            function getAgeGroup() {
+                let ageInYears;
+                const ageValue = parseFloat(ageValueEl.value) || 0;
+                
+                // 转换为岁
+                if (ageUnitEl.value === 'months') {
+                    ageInYears = ageValue / 12;
+                } else {
+                    ageInYears = ageValue;
+                }
+                
+                return {
+                    eyeGroup: ageInYears < 1 ? '<1岁' : '>1岁',
+                    motorGroup: ageInYears < 1 ? '<1岁' : '>1岁',
+                    verbalGroup: ageInYears < 2 ? '<2岁' : (ageInYears <= 5 ? '2-5岁' : '>5岁'),
+                    ageInYears: ageInYears
+                };
+            }
+            
+            // 更新所有下拉菜单选项
+            function updateAllOptions() {
+                const ageGroup = getAgeGroup();
+                
+                // 更新年龄分组显示
+                eyeAgeGroupEl.textContent = ageGroup.eyeGroup;
+                motorAgeGroupEl.textContent = ageGroup.motorGroup;
+                verbalAgeGroupEl.textContent = ageGroup.verbalGroup;
+                
+                // 备份当前选中的值
+                const eyeCurrentValue = eyeResponseEl.value;
+                const motorCurrentValue = motorResponseEl.value;
+                const verbalCurrentValue = verbalResponseEl.value;
+                
+                // 更新睁眼反应选项
+                updateEyeOptions(ageGroup.eyeGroup);
+                
+                // 更新运动反应选项
+                updateMotorOptions(ageGroup.motorGroup);
+                
+                // 更新语言反应选项
+                updateVerbalOptions(ageGroup.verbalGroup);
+                
+                // 恢复选中的值
+                eyeResponseEl.value = eyeCurrentValue;
+                motorResponseEl.value = motorCurrentValue;
+                verbalResponseEl.value = verbalCurrentValue;
+                
+                // 更新显示
+                updateDisplay();
+            }
+            
+            // 更新睁眼反应选项
+            function updateEyeOptions(eyeGroup) {
+                // 清空现有选项（保留第一个"请选择"选项）
+                while (eyeResponseEl.options.length > 1) {
+                    eyeResponseEl.remove(1);
+                }
+                
+                // 根据年龄组添加选项
+                if (eyeGroup === '<1岁') {
+                    // <1岁选项
+                    eyeResponseEl.add(new Option('自发睁眼        4分', '4'));
+                    eyeResponseEl.add(new Option('声音刺激时睁眼        3分', '3'));
+                    eyeResponseEl.add(new Option('疼痛刺激时睁眼        2分', '2'));
+                    eyeResponseEl.add(new Option('刺激后无反应        1分', '1'));
+                } else {
+                    // >1岁选项
+                    eyeResponseEl.add(new Option('自发睁眼        4分', '4'));
+                    eyeResponseEl.add(new Option('语言刺激时睁眼        3分', '3'));
+                    eyeResponseEl.add(new Option('疼痛刺激时睁眼        2分', '2'));
+                    eyeResponseEl.add(new Option('刺激后无反应        1分', '1'));
+                }
+            }
+            
+            // 更新运动反应选项
+            function updateMotorOptions(motorGroup) {
+                // 清空现有选项（保留第一个"请选择"选项）
+                while (motorResponseEl.options.length > 1) {
+                    motorResponseEl.remove(1);
+                }
+                
+                // 根据年龄组添加选项
+                if (motorGroup === '<1岁') {
+                    // <1岁选项
+                    motorResponseEl.add(new Option('自发运动        6分', '6'));
+                    motorResponseEl.add(new Option('因局部疼痛而动        5分', '5'));
+                    motorResponseEl.add(new Option('因疼痛而屈曲回缩        4分', '4'));
+                    motorResponseEl.add(new Option('因疼痛而成屈曲反应        3分', '3'));
+                    motorResponseEl.add(new Option('因疼痛呈伸展反应        2分', '2'));
+                    motorResponseEl.add(new Option('无运动反应        1分', '1'));
+                } else {
+                    // >1岁选项
+                    motorResponseEl.add(new Option('服从命令而动        6分', '6'));
+                    motorResponseEl.add(new Option('因局部疼痛而动        5分', '5'));
+                    motorResponseEl.add(new Option('因疼痛而屈曲回缩        4分', '4'));
+                    motorResponseEl.add(new Option('因疼痛而成屈曲反应        3分', '3'));
+                    motorResponseEl.add(new Option('因疼痛呈伸展反应        2分', '2'));
+                    motorResponseEl.add(new Option('无运动反应        1分', '1'));
+                }
+            }
+            
+            // 更新语言反应选项
+            function updateVerbalOptions(verbalGroup) {
+                // 清空现有选项（保留第一个"请选择"选项）
+                while (verbalResponseEl.options.length > 1) {
+                    verbalResponseEl.remove(1);
+                }
+                
+                // 根据年龄组添加选项
+                if (verbalGroup === '<2岁') {
+                    // <2岁选项
+                    verbalResponseEl.add(new Option('微笑，发声        5分', '5'));
+                    verbalResponseEl.add(new Option('哭闹，可安慰        4分', '4'));
+                    verbalResponseEl.add(new Option('持续哭闹，尖叫        3分', '3'));
+                    verbalResponseEl.add(new Option('呻吟，不安        2分', '2'));
+                    verbalResponseEl.add(new Option('无反应        1分', '1'));
+                } else if (verbalGroup === '2-5岁') {
+                    // 2-5岁选项
+                    verbalResponseEl.add(new Option('适当的单词，短语        5分', '5'));
+                    verbalResponseEl.add(new Option('词语不当        4分', '4'));
+                    verbalResponseEl.add(new Option('持续哭闹，尖叫        3分', '3'));
+                    verbalResponseEl.add(new Option('呻吟        2分', '2'));
+                    verbalResponseEl.add(new Option('无反应        1分', '1'));
+                } else {
+                    // >5岁选项
+                    verbalResponseEl.add(new Option('能定向说话        5分', '5'));
+                    verbalResponseEl.add(new Option('不能定向说话        4分', '4'));
+                    verbalResponseEl.add(new Option('语言不当        3分', '3'));
+                    verbalResponseEl.add(new Option('语言难以理解        2分', '2'));
+                    verbalResponseEl.add(new Option('无反应        1分', '1'));
+                }
+            }
+            
+            // 计算总分
+            function calculateTotalScore() {
+                const eyeScore = parseInt(eyeResponseEl.value) || 0;
+                const motorScore = parseInt(motorResponseEl.value) || 0;
+                const verbalScore = parseInt(verbalResponseEl.value) || 0;
+                
+                // 如果任何一项未选择，返回null
+                if (!eyeResponseEl.value || !motorResponseEl.value || !verbalResponseEl.value) {
+                    return null;
+                }
+                
+                return eyeScore + motorScore + verbalScore;
+            }
+            
+            // 更新显示
+            function updateDisplay() {
+                // 更新各项分数
+                eyeScoreEl.textContent = eyeResponseEl.value ? eyeResponseEl.value : '--';
+                motorScoreEl.textContent = motorResponseEl.value ? motorResponseEl.value : '--';
+                verbalScoreEl.textContent = verbalResponseEl.value ? verbalResponseEl.value : '--';
+                
+                // 计算总分
+                const total = calculateTotalScore();
+                
+                // 更新总分
+                if (total !== null) {
+                    totalScoreEl.textContent = total;
+                    
+                    // 更新严重程度分级
+                    updateSeverityLevel(total);
+                } else {
+                    totalScoreEl.textContent = '--';
+                    severityLevelEl.textContent = '--';
+                    severityLevelEl.className = 'severity-level';
+                }
+            }
+            
+            // 更新严重程度分级
+            function updateSeverityLevel(totalScore) {
+                let levelText = '';
+                let levelClass = '';
+                
+                if (totalScore >= 13) {
+                    levelText = '轻度意识障碍';
+                    levelClass = 'severity-level severity-mild';
+                } else if (totalScore >= 9) {
+                    levelText = '中度意识障碍';
+                    levelClass = 'severity-level severity-moderate';
+                } else {
+                    levelText = '重度意识障碍（昏迷）';
+                    levelClass = 'severity-level severity-severe';
+                }
+                
+                severityLevelEl.textContent = levelText;
+                severityLevelEl.className = levelClass;
+            }
+            
+            // 事件监听器
+            ageValueEl.addEventListener('change', updateAllOptions);
+            ageUnitEl.addEventListener('change', updateAllOptions);
+            
+            eyeResponseEl.addEventListener('change', updateDisplay);
+            motorResponseEl.addEventListener('change', updateDisplay);
+            verbalResponseEl.addEventListener('change', updateDisplay);
+            
+            resetBtn.addEventListener('click', function() {
+                // 重置所有选择
+                eyeResponseEl.value = '';
+                motorResponseEl.value = '';
+                verbalResponseEl.value = '';
+                
+                // 重置年龄为默认值
+                ageValueEl.value = '2';
+                ageUnitEl.value = 'years';
+                
+                // 更新所有选项
+                updateAllOptions();
+            });
+            
+            infoBtn.addEventListener('click', function() {
+                infoModal.style.display = 'flex';
+            });
+            
+            closeModalBtn.addEventListener('click', function() {
+                infoModal.style.display = 'none';
+            });
+            
+            infoModal.addEventListener('click', function(e) {
+                if (e.target === infoModal) {
+                    infoModal.style.display = 'none';
+                }
+            });
+            
+            // 初始加载
+            updateAllOptions();
+            
+            // 设置示例值（可选）
+            setTimeout(() => {
+                // 如果所有选项都为空，设置一个示例值
+                if (!eyeResponseEl.value && !motorResponseEl.value && !verbalResponseEl.value) {
+                    eyeResponseEl.value = '4';
+                    motorResponseEl.value = '6';
+                    verbalResponseEl.value = '5';
+                    updateDisplay();
+                }
+            }, 500);
+        });
+    </script>
+</body>
+</html>
